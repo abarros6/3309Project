@@ -14,9 +14,9 @@ wicked.get('/functionality1', (req, res) => {
   let conn = newConnection();
   conn.connect();
   let studentlist
-  conn.query(`select * from Student where fName=${req.query.fname} lName=${req.query.lname};`, (err,rows,fields) => {
+  conn.query(`select * from Student where fName='${req.query.fname}' AND lName='${req.query.lname}';`, (err,rows,fields) => {
     if (err)
-      res.send('ERROR: ' +err)
+      res.send('ERROR: ' + err)
     else {
       studentlist = rows
       let content = '';
@@ -24,13 +24,13 @@ wicked.get('/functionality1', (req, res) => {
       for (item of studentlist)
       {
           content += '<div>'
-          content += (item.fName + " " + item.lName + " : " + item.studentAge + "years old" + " ; " + item.studentYear + " : " + item.studentAverage + "%" + " : " + creditsToDate + "credits to date. " + " : " + item.numberOfClasses + "number of classes" + " : " + "classroom " + classroomNo + " : " + "instructor" + instructorNo) ;
+          content += ("Name: " + item.fName + " " + item.lName + " Age: " + item.studentAge + " years old" + "; Year " + item.studentYear + "; Average: " + item.studentAverage + "%;" + " Credits to date: " + item.creditsToDate  + "; " + "Number of classes: " + item.numberOfClasses +  "; Classroom: " + item.classroomNo + "; Instructor number: " + item.instructorNo) ;
           content += '</div>'
           content += '\n';
           content += '\n';
       }
       content += '<br/>';
-
+      content += `<a href= '/'>Quit</a>`;
       res.send(content);
     }
 
@@ -44,23 +44,24 @@ wicked.get('/functionality1', (req, res) => {
 wicked.get('/functionality2', (req, res) => {
   let conn = newConnection();
   conn.connect();
-  conn.query(`SELECT d.deptName, a.adminNo, min(a.salary), i.instructorNo, min(i.salary) 
-  FROM Department as d Right JOIN AdminStaff as a  RIGHT JOIN Instructor as i
-  GROUP BY d.deptName;`, (err,row,fields) => {
+  conn.query(`SELECT i.deptName, i.instructorNo, min(i.salary) as salary, i.fName, i.lName
+  FROM Department as d , Instructor as i
+  GROUP BY i.deptName;`, (err,rows,fields) => {
     if (err)
     res.send('ERROR: ' + err)
     else
     {
-      userList = rows;
+      let userList = rows;
       let content = '';
       for (u of userList)
       {
         content += '<div>'
-        content += u.fName + ' ' + u.lName + ' : $' + u.salary + ' Department: ' + u.dept
+        content += u.fName + ' ' + u.lName + ' : $' + u.salary + ' Department: ' + u.deptName
         content += '</div>'
         content += '<br>'
       }
-
+      content += '</div>';
+      content += `<a href= '/'>Quit</a>`;
       res.send(content);
     }
 
@@ -75,15 +76,29 @@ wicked.get('/functionality3', (req, res) => {
   let conn = newConnection();
   conn.connect();
 
-  conn.query(``,
-                (err,rows,fields) => {
-                    if (err)
-                        console.log(err);
-                    else
-                        console.log('students found');
-                })
+  conn.query(`SELECT s.fName, s.lName FROM Enrollment e, Student s 
+  WHERE e.sectionID= (SELECT e.sectionID FROM Enrollment e, Section s 
+  WHERE '${req.query.studentnum}' given AND '${req.query.courseID}') And e.studentNo = s.studentNo ;`,
+  (err,rows,fields) => {
+    if (err)
+      console.log(err);
+    else{
+      let studentsnamelist = rows;
+      let content = ' ';
+      for (x in studentsnamelist)
+      {
+        content += '<div>'
+        content += x.fName + ' ' + x.lName
+        content += '</div>'
+        content += '<br>'
+      }
+      content += '</div>';
+      content += `<a href= '/'>Quit</a>`;
+      res.send(content);
 
+    }
 
+    })
 
   conn.end();
 })
@@ -93,7 +108,8 @@ wicked.get('/functionality3', (req, res) => {
 wicked.get('/functionality4', (req, res) => {
   let conn = newConnection();
   conn.connect();
-  conn.query(`INSERT INTO Student (fName ,lName ,studentAge, studentYear ,creditsToDate ,numberOfClasses ) VALUES ( ${req.query.studentFName}, ${req.query.studentLName}, ${req.query.studentAge}, ${req.query.studentYear}, ${req.query.studentCredits}, ${req.query.studentClasses},);` , (err,rows,fields) => {
+  
+  conn.query(`INSERT INTO Student (fName ,lName ,studentAge, studentYear , creditsToDate, numberOfClasses) VALUES ( '${req.query.studentFName}', '${req.query.studentLName}', '${req.query.studentAge}', '${req.query.studentYear}', '${req.query.studentCredits}', '${req.query.studentClasses}');` , (err,rows,fields) => {
 
     if (err) { 
 
@@ -104,7 +120,7 @@ wicked.get('/functionality4', (req, res) => {
       let content = '';
 
       content += '<div>';
-        content += '<h3>Student '+ rows.studentFName + ' ' + rows.studentLName + 'is now enrolled!</h3>';
+        content += '<h3>Student '+ req.query.studentFName + ' ' + req.query.studentLName + ' is now enrolled!</h3>';
       content += '</div>';
 
       res.send(content);
@@ -121,8 +137,8 @@ wicked.get('/functionality5', (req, res) => {
   conn.connect();
 
   conn.query(`UPDATE Instructor
-              SET salary = salary*`+req.query.raise+` 
-              WHERE deptName = `+req.query.dept+`;`,
+              SET salary = salary*1.`+req.query.raise+` 
+              WHERE deptName = '`+req.query.dept+`';`,
                 (err,rows,fields) => {
                     if (err)
                         console.log(err);
@@ -141,9 +157,9 @@ wicked.get('/functionality6', (req, res) => {
   let conn = newConnection();
   conn.connect();
 
-  conn.query(`SELECT t.courseID, e.startTime, e.endTime
+  conn.query(`SELECT t.courseID, t.startTime, t.endTime
   FROM Enrollment e, Student s, Section t
-  WHERE s.fName = ${req.query.studentFName} AND s.lName = ${req.query.studentLName} AND s.studentNo = e.studentNo AND e.sectionID = t.sectionID;` , (err,rows,fields) => {
+  WHERE s.fName = '${req.query.studentFName}' AND s.lName = '${req.query.studentLName}' AND s.studentNo = e.studentNo AND e.sectionID = t.sectionID;` , (err,rows,fields) => {
 
     if (err) { 
 
@@ -152,13 +168,14 @@ wicked.get('/functionality6', (req, res) => {
     } else {
       let content = '<div>';
 
-      for (r in rows) {
+      for (r of rows) {
         content += '<div>';
         content += 'Course Number: ' + r.courseID + ' Start Time: ' + r.startTime + ' Start Time: ' + r.endTime;
         content += '</div>';
         content += '\n';
       }
       content += '</div>';
+      content += `<a href= '/'>Quit</a>`;
       res.send(content);
     }
   })

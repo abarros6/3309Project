@@ -8,24 +8,22 @@
 </head>
 <body>
     <h1>Student Info</h1>
-    <div>
-        <form action = '/functionality1' method="get">
-        <input type='text' id='studentName'>
-        
-        <button>Search</button>
 
+    <h4>Query Description</h4>
+
+    <p>
+        Enter a student's first name and last name to look up students by name and return all related information: <br> (name, age, year, average, credits to date, number of classes, home classroom, and intructor number)
+    </p>
+
+    <div classname = 'StudentsWithASpecificName'>
+        <form action = '/Functionality1' method='get'> 
+            Student First Name : <input name = 'fname' type = 'text'/>
+            Student Last Name : <input name = 'lname' type = 'text'/>
+            <input type = 'submit' value = 'Search'/>
         </form>
     </div>
 
-    <br>
-    <br>
-    <br>
-
     <hr>
-
-    <br/>
-    <br/>
-    <br/>
 
     <a href= '/'>Quit</a>
 </body>
