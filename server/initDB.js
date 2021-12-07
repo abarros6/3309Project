@@ -1,4 +1,4 @@
-//this is where i will initialize the database
+//refactored from ryans edits
 
 const content = require("./populate");
 const mysql = require('mysql2');
@@ -162,7 +162,7 @@ function dropTable (connection, query) {
 const conn = mysql.createConnection({
     host:'127.0.0.1',
     user: 'root',
-    password:'6474584026Ab',
+    password:'',
     port: '3306',
     multipleStatements: true
 });
