@@ -1,59 +1,32 @@
 //this is where i will initialize the database
-let deptContent = require
-import{deptContent,
-    adminContent,
-    classContent,
-    instructorContent,
-    studentContent,
-    courseContent,
-    sectionContent,
-    enrollmentContent,
-    equipmentContent,
-    allotmentContent} from './populate.js';
 
+const content = require("./populate");
 const mysql = require('mysql2');
 
-const conn = mysql.createConnection({
-    host:'127.0.0.1',
-    user: 'root',
-    password:'',
-    database:'sys',
-    port: '3306'
-});
+let deptContent = content.deptContent;
+let adminContent = content.adminContent;
+let classContent = content.classContent;
+let instructorContent = content.instructorContent;
+let studentContent = content.studentsContent;
+let courseContent = content.courseContent;
+let sectionContent = content.sectionContent;
+let enrollmentContent = content.enrollmentContent;
+let equipmentContent = content.equipmentContent;
+let allotmentContent = content.allotmentContent;
 
-conn.connect(function(err) {
-    if (err) throw err;
-    console.log("Connected!");
-  });
-
-//if there are tables in place already then reset them
-conn.query(`Drop Table Allotment,CourseEquipment,Enrollment,Section,Course,Student,Instructor,AdminStaff,Classroom,Department`,
-                (err,rows,fields) => {
-                    if (err)
-                        console.log(err);
-                    else
-                        console.log('Tables Dropped');
-                }
-            )
-
-//init the tables
-conn.query(`
-CREATE TABLE Department(
+const initDepartment = `CREATE TABLE Department(
     deptName varchar(255),
     instructorsAssiged int,
     studentsEnrolled int,
     PRIMARY KEY (deptName)
-);
---removed instructor no as instructor already holds a reference to classNo
-CREATE TABLE Classroom(
+)`
+const initClassroom = `CREATE TABLE Classroom(
     classroomNo int NOT NULL AUTO_INCREMENT,
     classroomQuantity int,
-    --number of courses tought
     coursesTaught int,
     PRIMARY KEY (classroomNo)
-);
-
-CREATE TABLE AdminStaff(
+)`
+const initAdminStaff = `CREATE TABLE AdminStaff(
     adminNo int NOT NULL AUTO_INCREMENT,
     position varchar(255),
     startDate DATE,
@@ -64,10 +37,8 @@ CREATE TABLE AdminStaff(
     PRIMARY KEY (adminNo),
     FOREIGN KEY (deptName) REFERENCES Department(deptName)
     ON DELETE SET NULL ON UPDATE CASCADE  
-);
-
---added reference to department--instructor no longer hold reference to classroom number
-CREATE TABLE Instructor(
+)`
+const initInstructor = `CREATE TABLE Instructor(
     instructorNo int NOT NULL AUTO_INCREMENT,
     deptName varchar(255),
     coursesTaught int,
@@ -77,9 +48,8 @@ CREATE TABLE Instructor(
     PRIMARY KEY (instructorNo),
     FOREIGN KEY (deptName) REFERENCES Department(deptName)
     ON DELETE SET NULL ON UPDATE CASCADE  
-);
-
-CREATE TABLE Student(
+)`
+const initStudent = `CREATE TABLE Student(
     studentNo int NOT NULL AUTO_INCREMENT,
     fName varchar(255),
     lName varchar(255),
@@ -95,11 +65,8 @@ CREATE TABLE Student(
     ON DELETE SET NULL ON UPDATE CASCADE,
     FOREIGN KEY (instructorNo) REFERENCES Instructor(instructorNo)
     ON DELETE SET NULL ON UPDATE CASCADE
-);
-
-
-
-CREATE TABLE Course(
+)`
+const initCourse = `CREATE TABLE Course(
     courseID int NOT NULL AUTO_INCREMENT,
     courseName varchar(255),
     courseClassroom int,
@@ -113,9 +80,8 @@ CREATE TABLE Course(
     ON DELETE SET NULL ON UPDATE CASCADE,
     FOREIGN KEY (instructorNo) REFERENCES Instructor(instructorNo)
     ON DELETE SET NULL ON UPDATE CASCADE
-);
---changed timing name to section, added id with auto increment
-CREATE TABLE Section(
+)`
+const initSection = `CREATE TABLE Section(
     sectionID int NOT NULL AUTO_INCREMENT,
     courseID int,
     startDate DATE,
@@ -124,10 +90,9 @@ CREATE TABLE Section(
     endTime TIME,
     PRIMARY KEY (sectionID),
     FOREIGN KEY (courseID) REFERENCES Course(courseID)
-    ON DELETE CASCADE ON UPDATE CASCADE,
-);
---enrollment now references a section 
-CREATE TABLE Enrollment(
+    ON DELETE CASCADE ON UPDATE CASCADE
+)`
+const initEnrollment = `CREATE TABLE Enrollment(
     studentNo int,
     sectionID int,
     dateEnrolled DATE,
@@ -137,9 +102,8 @@ CREATE TABLE Enrollment(
 	ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (sectionID) REFERENCES Section(sectionID)
 	ON DELETE CASCADE ON UPDATE CASCADE
-);
-
-CREATE TABLE CourseEquipment(
+)`
+const initCourseEquipment = `CREATE TABLE CourseEquipment(
     deviceNo int NOT NULL AUTO_INCREMENT,
     deviceName varchar(255),
     courseAssigned int,
@@ -150,10 +114,8 @@ CREATE TABLE CourseEquipment(
     ON DELETE SET NULL ON UPDATE CASCADE,
     FOREIGN KEY (studentNo) REFERENCES Student(studentNo)
     ON DELETE SET NULL ON UPDATE CASCADE
-);
-
-
-CREATE TABLE Allotment(
+)`
+const initAllotment = `CREATE TABLE Allotment(
     instructorNo int,
     classroomNo int,
     dateAssigned DATE,
@@ -163,15 +125,80 @@ CREATE TABLE Allotment(
     ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (classroomNo) REFERENCES Classroom(classroomNo)
     ON DELETE CASCADE ON UPDATE CASCADE
-);
-            ` 
-            , (err,rows,fields) => {
-                if (err)
-                    console.log(err);
-                else
-                    console.log('Tables Created');
-            })
+)`
 
+const createDB = `create database wicked; use wicked;`
+
+const dropDepartment = `Drop Table Deparment`
+const dropClassroom = `Drop Table Classroom`
+const dropAdminStaff = `Drop Table AdminStaff`
+const dropInstructor = `Drop Table Instructor`
+const dropStudent = `Drop Table Student`
+const dropCourse = `Drop Table Course`
+const dropSection = `Drop Table Section`
+const dropEnrollment = `Drop Table Enrollment`
+const dropCourseEquipment = `Drop Table CourseEquipment`
+const dropAllotment = `Drop Table Allotment`
+
+function createTable (connection, query) {
+    connection.query(query,(err,rows,fields) => {
+        if (err)
+            console.log(err);
+        else
+            console.log('Table Created');
+    })
+}
+
+function dropTable (connection, query) {
+    connection.query(query,(err,rows,fields) => {
+        if (err)
+            console.log(err);
+        else
+            console.log('Table Dropped');
+    })
+}
+
+const conn = mysql.createConnection({
+    host:'127.0.0.1',
+    user: 'root',
+    password:'6474584026Ab',
+    port: '3306',
+    multipleStatements: true
+});
+
+conn.connect(function(err) {
+    if (err) throw err;
+    console.log("Connected!");
+});
+
+conn.query(createDB,(err,rows,fields) => {
+    if (err)
+        console.log(err);
+    else
+        console.log('DB created');
+});
+  
+dropTable(conn, dropDepartment)
+dropTable(conn, dropClassroom)
+dropTable(conn, dropAdminStaff)
+dropTable(conn, dropInstructor)
+dropTable(conn, dropStudent)
+dropTable(conn, dropCourse)
+dropTable(conn, dropSection)
+dropTable(conn, dropEnrollment)
+dropTable(conn, dropCourseEquipment)
+dropTable(conn, dropAllotment)
+
+createTable(conn, initDepartment)
+createTable(conn, initClassroom)
+createTable(conn, initAdminStaff)
+createTable(conn, initInstructor)
+createTable(conn, initStudent)
+createTable(conn, initCourse)
+createTable(conn, initSection)
+createTable(conn, initEnrollment)
+createTable(conn, initCourseEquipment)
+createTable(conn, initAllotment)
 
 //populate the tables
 conn.query( deptContent
@@ -245,6 +272,5 @@ conn.query( allotmentContent
         else
             console.log('data inserted');
     });
-
 
 conn.end();
