@@ -7,7 +7,7 @@ let deptContent = content.deptContent;
 let adminContent = content.adminContent;
 let classContent = content.classContent;
 let instructorContent = content.instructorContent;
-let studentContent = content.studentsContent;
+let studentContent = content.studentContent;
 let courseContent = content.courseContent;
 let sectionContent = content.sectionContent;
 let enrollmentContent = content.enrollmentContent;
@@ -128,6 +128,7 @@ const initAllotment = `CREATE TABLE Allotment(
 )`
 
 const createDB = `create database wicked; use wicked;`
+const dropDB = `drop database wicked;`
 
 const dropDepartment = `Drop Table Deparment`
 const dropClassroom = `Drop Table Classroom`
@@ -171,6 +172,13 @@ conn.connect(function(err) {
     console.log("Connected!");
 });
 
+conn.query(dropDB,(err,rows,fields) => {
+    if (err)
+        console.log(err);
+    else
+        console.log('DB dropped');
+});
+
 conn.query(createDB,(err,rows,fields) => {
     if (err)
         console.log(err);
@@ -200,77 +208,85 @@ createTable(conn, initEnrollment)
 createTable(conn, initCourseEquipment)
 createTable(conn, initAllotment)
 
+
 //populate the tables
+
 conn.query( deptContent
     , (err,rows,fields) => {
         if (err)
             console.log(err);
         else
-            console.log('data inserted');
-    });
+            console.log(' dept data inserted');
+    })
 
 conn.query( adminContent
     , (err,rows,fields) => {
         if (err)
             console.log(err);
         else
-            console.log('data inserted');
-    });          
+            console.log('admin data inserted');
+    })         
 conn.query( classContent
     ,(err,rows,fields) => {
         if (err)
             console.log(err);
         else
-            console.log('data inserted');
-    });
+            console.log('classroom data inserted');
+    })
 conn.query( instructorContent
     ,(err,rows,fields) => {
         if (err)
             console.log(err);
         else
-            console.log('data inserted');
-    });
-conn.query( studentContent
-    ,(err,rows,fields) => {
-        if (err)
-            console.log(err);
-        else
-            console.log('data inserted');
-    });
+            console.log('instructor data inserted');
+    })
+    
+    
+    
+    conn.query( studentContent
+        ,(err,rows,fields) => {
+            if (err)
+                console.log(err);
+            else
+                console.log('student data inserted');
+        })
+        
+
+    
 conn.query( courseContent
     ,(err,rows,fields) => {
         if (err)
             console.log(err);
         else
-            console.log('data inserted');
-    });
+            console.log('course data inserted');
+    })
 conn.query( sectionContent
     ,(err,rows,fields) => {
         if (err)
             console.log(err);
         else
-            console.log('data inserted');
-    });
+            console.log('section data inserted');
+    })
 conn.query( enrollmentContent
     ,(err,rows,fields) => {
         if (err)
             console.log(err);
         else
-            console.log('data inserted');
-    });
+            console.log('enrollments data inserted');
+    })
 conn.query( equipmentContent
     ,(err,rows,fields) => {
         if (err)
             console.log(err);
         else
-            console.log('data inserted');
-    });
+            console.log('equipment data inserted');
+    })
 conn.query( allotmentContent
     ,(err,rows,fields) => {
         if (err)
             console.log(err);
         else
-            console.log('data inserted');
-    });
+            console.log('allotment data inserted');
+    })
 
 conn.end();
